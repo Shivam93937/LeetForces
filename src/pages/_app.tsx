@@ -9,7 +9,7 @@ export default function App({Component, pageProps}:AppProps){
     return (
         <RecoilRoot>
             <Head>
-                <title>Leetclone</title>
+                <title>Leetforces</title>
                 <link rel='icon' href='/favicon.png'/>
             </Head>
             <ToastContainer/>
