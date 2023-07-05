@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import CircleSkeleton from '@/components/Skeletons/CircleSkeleton';
 import RectangleSkeleton from '@/components/Skeletons/RectangleSkeleton';
 import { auth, firestore } from '@/firebase/firebase';
@@ -229,6 +230,7 @@ const ProblemDescription:React.FC<ProblemDescriptionProps> = ({problem}) => {
 									<div key={example.id}>
 								<p className='font-medium text-white '>Example {ind+1}: </p>
 								{example.img && (
+									// eslint-disable-next-line jsx-a11y/alt-text
 									<img src={example.img} className='mt-3'/>
 								)}
 								<div className='example-card'>

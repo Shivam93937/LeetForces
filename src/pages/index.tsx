@@ -5,21 +5,26 @@ import ProblemsTable from "@/components/ProblemsTable/ProblemsTable";
 import { useState } from "react";
 import { doc, setDoc } from "firebase/firestore";
 import { firestore } from "@/firebase/firebase";
+import useHasMounted from "@/hooks/useHasMounted";
 
 export default function Home() {
   const [loadingProblems, setLoadingProblems] = useState(true);
+
   const [inputs, setInputs] = useState({
-    id:'',
-    title:'',
-    difficulty:'',
-    category:'',
-    order:0,
-    videoId:'',
-    link:'',
-    likes:0,
-    dislikes:0,
+  id:'',
+  title:'',
+  difficulty:'',
+  category:'',
+  order:0,
+  videoId:'',
+  link:'',
+  likes:0,
+  dislikes:0,
   });
 
+  const hasMounted = useHasMounted();
+  if(!hasMounted) return null;
+  
   const handleInputChange = (e:React.ChangeEvent<HTMLInputElement>)=>{
     setInputs({
       ...inputs,
