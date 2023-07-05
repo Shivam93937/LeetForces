@@ -7,14 +7,63 @@ import { javascript } from '@codemirror/lang-javascript';
 import { cpp } from '@codemirror/lang-cpp';
 import EditorFooter from './EditorFooter';
 import { Problem } from '@/utils/types/problem';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth, firestore } from '@/firebase/firebase';
+import { toast } from 'react-toastify';
+import { useRouter } from 'next/router';
+import { problems } from '@/utils/problems';
+import { arrayUnion, doc, updateDoc } from 'firebase/firestore';
 
 type PlayGroundProps = {
-    problem:Problem
+    problem:Problem;
+    setSuccess: React.Dispatch<React.SetStateAction<boolean>>
+    setSolved: React.Dispatch<React.SetStateAction<boolean>>
+
 };
 
-const PlayGround:React.FC<PlayGroundProps> = ({problem}) => {
+const PlayGround:React.FC<PlayGroundProps> = ({problem, setSuccess, setSolved}) => {
     const [activeTestCaseId, setActiveTestCaseId] = useState<number>(0);
-    
+    const [userCode, setUserCode] = useState<string>(problem.starterCode);
+    const [user] = useAuthState(auth);
+    const {query:{pid}} = useRouter();
+    const handleSubmit = async ()=>{
+        if(!user){
+            toast.error("Please log-in to submit your code",{position:"top-center", autoClose:3000, theme:"dark"});
+            return;
+        }
+
+        try {
+            const cb=new Function (`return ${userCode}`)();
+            const success = problems[pid as string].handlerFunction(cb); 
+            if(success){
+                toast.success("Test-Cases Passed",{
+                    position:"top-center",
+                    autoClose:3000,
+                    theme:"dark"
+                })
+                setSuccess(true); 
+                setSolved(true);
+                setTimeout(()=>{
+                    setSuccess(false);
+                },3000)
+                const userRef = doc(firestore,"users",user.uid);
+                await updateDoc(userRef,{
+                    solvedProblems:arrayUnion(pid),
+                })
+            }
+        } 
+        catch (error:any) {
+            if(error.message.startsWith("AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:"))
+                toast.error("Oops! One or more Test Cases Failed!",{position:"top-center",autoClose:3000,theme:"dark"});
+            else{
+                toast.error(error.message,{position:"top-center",autoClose:3000,theme:"dark"});
+            }
+            console.log(error);
+        }
+    }
+    const onChange = (value:string)=>{
+        setUserCode(value)
+    }
     return (
         <>
         <div className='flex flex-col bg-dark-layer-1 relative overflow-x-hidden'>
@@ -26,6 +75,7 @@ const PlayGround:React.FC<PlayGroundProps> = ({problem}) => {
                     theme={vscodeDark}
                     extensions={[javascript(),cpp()]}
                     style={{fontSize:16}}
+                    onChange={onChange}
                 />
             </div>
         <div className='w-full px-5 overflow-auto '>
@@ -67,7 +117,7 @@ const PlayGround:React.FC<PlayGroundProps> = ({problem}) => {
 
         </div>
         </Split>
-        <EditorFooter/>
+        <EditorFooter handleSubmit = {handleSubmit}/>
         </div>
         </>
     )

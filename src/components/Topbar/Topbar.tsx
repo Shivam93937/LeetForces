@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { auth } from "@/firebase/firebase";
 import Link from "next/link";
 import React from "react";
