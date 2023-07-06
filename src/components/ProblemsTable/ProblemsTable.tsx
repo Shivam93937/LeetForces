@@ -5,9 +5,10 @@ import { BsCheckCircle } from "react-icons/bs";
 import {AiFillYoutube} from "react-icons/ai";
 import {IoClose} from "react-icons/io5"
 import YouTube from "react-youtube";
-import { collection, getDocs, orderBy, query } from "firebase/firestore";
-import { firestore } from "@/firebase/firebase";
+import { collection, doc, getDoc, getDocs, orderBy, query } from "firebase/firestore";
+import { auth, firestore } from "@/firebase/firebase";
 import { DBProblem } from "@/utils/types/problem";
+import { useAuthState } from "react-firebase-hooks/auth";
 
 type ProblemsTableProps = {
   setLoadingProblems: React.Dispatch<React.SetStateAction<boolean>>;
@@ -20,6 +21,8 @@ const [youtubePlayer, setYoutubePlayer] = useState({
 })
 
 const problems=useGetProblems(setLoadingProblems);
+const solvedProblems = useGetSolvedProblems();
+
 const closeModel=()=>{
     setYoutubePlayer({
         isOpen:false,
@@ -48,7 +51,7 @@ useEffect(()=>{
             key={problem.id}
           >
             <th className="px-2 py-4 font-medium whitespace-nowrap text-dark-green-s">
-              <BsCheckCircle fontSize={"18"} width="18" />
+              {solvedProblems.includes(problem.id) && <BsCheckCircle fontSize={"18"} width="18" />}
             </th>
             <td className="px-6 py-4">
               {problem.link?(
@@ -115,4 +118,23 @@ function useGetProblems(setLoadingProblems: React.Dispatch<React.SetStateAction<
   },[setLoadingProblems])
 
   return problems;
+}
+
+function useGetSolvedProblems(){
+  const [solvedProblems, setSolvedProblems] = useState<string[]>([]);
+  const[user]=useAuthState(auth);
+  useEffect(()=>{
+    const getSolvedProblems =async () => {
+      const userRef=doc(firestore,"users",user!.uid);
+      const userDoc=await getDoc(userRef);
+
+      if(userDoc.exists()){
+        setSolvedProblems(userDoc.data().solvedProblems);
+      }
+    }
+    if(user) getSolvedProblems();
+    if(!user) setSolvedProblems([]);
+  },[user])
+
+  return solvedProblems;
 }

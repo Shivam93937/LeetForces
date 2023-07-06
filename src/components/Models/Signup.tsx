@@ -63,7 +63,7 @@ const Signup: React.FC<SignupProps> = () => {
 
   return (
     <form className="space-y-6 px-6 py-4" onSubmit={handleRegister}>
-      <h3 className="text-xl font-medium text-white">Register to Leetclone</h3>
+      <h3 className="text-xl font-medium text-white">Register to LeetForces</h3>
       <div>
         <label
           htmlFor="email"
