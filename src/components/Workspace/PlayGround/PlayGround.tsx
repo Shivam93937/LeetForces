@@ -86,7 +86,7 @@ const PlayGround:React.FC<PlayGroundProps> = ({problem, setSuccess, setSolved}) 
     }
 
     useEffect(()=>{
-        const code = localStorage.getItem(`code-{pid}`);
+        const code = localStorage.getItem(`code-${pid}`);
         if(user){
             setUserCode(code ? JSON.parse(code): problem.starterCode);
         }
@@ -94,8 +94,10 @@ const PlayGround:React.FC<PlayGroundProps> = ({problem, setSuccess, setSolved}) 
             setUserCode(problem.starterCode);
         }
     },[pid,user,problem.starterCode])
+
     const onChange = (value:string)=>{
         setUserCode(value);
+        console.log(value);
         localStorage.setItem(`code-${pid}`,JSON.stringify(value));
     }
     return (
